@@ -1,5 +1,5 @@
 {
-    "name": "tivoka/tivoka",
+    "name": "nocksapp/tivoka",
     "type": "library",
     "description": "The universal JSON-RPC client/server library. JSON-RPC done right!",
     "keywords": ["json", "rpc", "json-rpc", "api", "xml-rpc"],
