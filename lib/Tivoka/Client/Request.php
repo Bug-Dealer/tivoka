@@ -95,8 +95,11 @@ class Request
 
       $header_array = array();
       foreach($headers as $header) {
-        preg_match('/(?P<label>[^ :]+):(?P<body>(.|\r?\n(?= +))*)$/', $header, $matches);
-        $headers_array[$matches["label"]] = trim($matches["body"]);
+        if(isset($matches["label"]) && isset($matches["body"]))
+          {
+              preg_match('/(?P<label>[^ :]+):(?P<body>(.|\r?\n(?= +))*)$/', $header, $matches);
+              $headers_array[$matches["label"]] = trim($matches["body"]);
+          }
       };
       return $headers_array;
     }
