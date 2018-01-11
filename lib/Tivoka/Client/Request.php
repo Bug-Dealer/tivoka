@@ -93,7 +93,7 @@ class Request
       // rfc2616: The first line of a Response message is the Status-Line
       $headers = array_slice($headers, 1); // removing status-line
 
-      $header_array = array();
+      $headers_array = array();
       foreach($headers as $header) {
         if(isset($matches["label"]) && isset($matches["body"]))
           {
