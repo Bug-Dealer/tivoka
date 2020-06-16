@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Tivoka - JSON-RPC done right!
  * Copyright (c) 2011-2012 by Marcel Klehr <mklehr@gmx.net>
@@ -28,8 +29,8 @@
  * @copyright (c) 2011-2012, Marcel Klehr
  */
 
-
 namespace Tivoka\Client;
+
 use Tivoka\Exception;
 use Tivoka\Tivoka;
 
@@ -39,6 +40,12 @@ use Tivoka\Tivoka;
  */
 class BatchRequest extends Request
 {
+    public $requests;
+    /**
+     * @var int
+     */
+    public $spec;
+
     /**
      * Constructs a new JSON-RPC batch request
      * All values of type other than Tivoka\Client\Request will be ignored
@@ -47,25 +54,26 @@ class BatchRequest extends Request
      */
     public function __construct(array $batch)
     {
-        $this->id = array();
-    
+        $this->id = [];
+
         //prepare requests...
-        foreach($batch as $request)
-        {
-            if(!($request instanceof Request) && !($request instanceof Notification))
+        foreach ($batch as $request) {
+            if (!($request instanceof Request) && !($request instanceof Notification)) {
                 continue;
-            
+            }
+
             //request...
-            if($request instanceof Request)
-            {
-                if(in_array($request->id, $this->id, true)) continue; // strict compare
+            if ($request instanceof Request) {
+                if (in_array($request->id, $this->id, true)) {
+                    continue; // strict compare
+                }
                 $this->id[$request->id] = $request;
             }
-            
+
             $this->requests[] = $request;
         }
     }
-    
+
     /**
      * Get the raw, JSON-encoded request
      *
@@ -74,63 +82,69 @@ class BatchRequest extends Request
      * @return string the JSON encoded request
      * @throws Exception\SpecException
      */
-    public function getRequest($spec) {
-        if($spec == Tivoka::SPEC_1_0) throw new Exception\SpecException('Batch requests are not supported by JSON-RPC 1.0 spec');
+    public function getRequest($spec): string
+    {
+        if ($spec == Tivoka::SPEC_1_0) {
+            throw new Exception\SpecException('Batch requests are not supported by JSON-RPC 1.0 spec');
+        }
         $this->spec = $spec;
-        $request = array();
-        foreach($this->requests as $req) {
+        $request = [];
+        foreach ($this->requests as $req) {
             $request[] = json_decode($req->getRequest($spec), true);
         }
         return $this->request = json_encode($request);
     }
-    
+
     /**
      * Interprets the parsed response
      *
      * @param array $json_struct json data
-     *
-     * @return void
      * @throws Exception\SyntaxException
      */
-    public function interpretResponse($json_struct) {
+    public function interpretResponse($json_struct): void
+    {
         //validate
-        if(count($json_struct) < 1 || !is_array($json_struct)) {
+        if (!is_array($json_struct) || count($json_struct) < 1) {
             throw new Exception\SyntaxException('Expected batch response, but none was received');
         }
-    
+
         $requests = $this->id;
-        $nullresps = array();
-        $responses = array();
-    
+        $nullresps = [];
+
         //split..
-        foreach($json_struct as $resp)
-        {
-            if(!is_array($resp)) throw new Exception\SyntaxException('Expected batch response, but no array was received');
-                
+        foreach ($json_struct as $resp) {
+            if (!is_array($resp)) {
+                throw new Exception\SyntaxException('Expected batch response, but no array was received');
+            }
+
             //is jsonrpc protocol?
-            if(!isset($resp['jsonrpc']) && !isset($resp['id'])) throw new Exception\SyntaxException('The received reponse doesn\'t implement the JSON-RPC prototcol.');
-                
+            if (!isset($resp['jsonrpc']) && !isset($resp['id'])) {
+                throw new Exception\SyntaxException('The received reponse doesn\'t implement the JSON-RPC protocol.');
+            }
+
             //responds to an existing request?
-            if(!array_key_exists($resp['id'], $requests))
-            {
-                if($resp['id'] != null) continue;
-    
+            if (!array_key_exists($resp['id'], $requests)) {
+                if (isset($resp['id'])) {
+                    continue;
+                }
+
                 $nullresps[] = $resp;
                 continue;
             }
-    
+
             //normal response...
-            $requests[ $resp['id'] ]->setResponse(json_encode($resp));
-            unset($requests[ $resp['id'] ]);
+            $requests[$resp['id']]->setResponse(json_encode($resp));
+            unset($requests[$resp['id']]);
         }
-    
+
         //handle id:null responses...
-        foreach($requests as $req)
-        {
-            if($req instanceof Notification) continue;
+        foreach ($requests as $req) {
+            if ($req instanceof Notification) {
+                continue;
+            }
             $resp = array_shift($nullresps);
-            $requests[ $req->id ]->setResponse(json_encode($resp));
-        }       
+            $requests[$req->id]->setResponse(json_encode($resp));
+        }
     }
 
     /**
@@ -138,17 +152,14 @@ class BatchRequest extends Request
      * @param array $raw_headers array of string coming from $http_response_header magic var
      * @return void
      */
-    public function setHeaders($raw_headers) {
+    public function setHeaders($raw_headers): void
+    {
+        parent::setHeaders($raw_headers);
 
-      parent::setHeaders($raw_headers);
-
-      $requests = $this->id;
-      foreach($requests as $req) {
-        $requests[ $req->id ]->responseHeadersRaw = $raw_headers;
-        $requests[ $req->id ]->responseHeaders = $this->responseHeaders;
-      }
+        foreach ($this->id as $request) {
+            $request->responseHeadersRaw = $raw_headers;
+            $request->responseHeaders    = $this->responseHeaders;
+        }
+        unset($request);
     }
-
-
 }
-?>

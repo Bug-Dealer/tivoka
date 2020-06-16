@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Tivoka - JSON-RPC done right!
  * Copyright (c) 2011-2012 by Marcel Klehr <mklehr@gmx.net>
@@ -30,6 +31,7 @@
  */
 
 namespace Tivoka\Client\Connection;
+
 use Tivoka\Client\BatchRequest;
 use Tivoka\Exception;
 use Tivoka\Client\Request;
@@ -38,8 +40,9 @@ use Tivoka\Client\Request;
  * Raw TCP connection
  * @package Tivoka
  */
-class Tcp extends AbstractConnection {
-    
+class Tcp extends AbstractConnection
+{
+
 
     /**
      * Server host.
@@ -86,7 +89,7 @@ class Tcp extends AbstractConnection {
             fclose($this->socket);
         }
     }
-    
+
     /**
      * Changes timeout.
      * @param int $timeout
@@ -94,26 +97,27 @@ class Tcp extends AbstractConnection {
      */
     public function setTimeout($timeout)
     {
-    	$this->timeout = $timeout;
-    
-    	// change timeout for already initialized connection
-    	if (isset($this->socket)) {
-    		stream_set_timeout($this->socket, $timeout);
-    	}
-    
-    	return $this;
+        $this->timeout = $timeout;
+
+        // change timeout for already initialized connection
+        if (isset($this->socket)) {
+            stream_set_timeout($this->socket, $timeout);
+        }
+
+        return $this;
     }
 
     /**
      * Sends a JSON-RPC request over plain TCP.
      *
-     * @param Request $request,... A Tivoka request.
-     *
+     * @param Request[] $requests
      * @return Request|BatchRequest If sent as a batch request the BatchRequest object will be returned.
      * @throws Exception\ConnectionException
      * @throws Exception\Exception
+     * @throws Exception\SpecException
+     * @throws Exception\SyntaxException
      */
-    public function send(Request $request)
+    public function send(Request ...$requests): Request
     {
         // connect on first call
         if (!isset($this->socket)) {
@@ -121,18 +125,13 @@ class Tcp extends AbstractConnection {
 
             // check for success
             if ($this->socket === false) {
-                throw new Exception\ConnectionException('Connection to "' . $this->host . ':' . $this->port . '" failed (errno ' . $errno . '): ' . $errstr);
+                throw new Exception\ConnectionException("Connection to '{$this->host}:{$this->port}' failed (errno '$errno'): $errstr");
             }
 
             stream_set_timeout($this->socket, $this->timeout);
         }
 
-        if (func_num_args() > 1) {
-            $request = func_get_args();
-        }
-        if (is_array($request)) {
-            $request = new BatchRequest($request);
-        }
+        $request = count($requests) === 1 ? reset($requests) : new BatchRequest($requests);
 
         if (!($request instanceof Request)) {
             throw new Exception\Exception('Invalid data type to be sent to server');

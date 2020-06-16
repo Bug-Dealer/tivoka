@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Tivoka - JSON-RPC done right!
  * Copyright (c) 2011-2012 by Marcel Klehr <mklehr@gmx.net>
@@ -31,20 +32,17 @@
 namespace Tivoka;
 
 /**
- * The public interface on the server-side 
+ * The public interface on the server-side
  * @package Tivoka
  */
 abstract class Server
 {
-    
+
     /**
      * Creates a server instance
-     * @param object $host An object whose methods will be provided for invokation
-     * @return Server\Server
      */
-    public static function provide($host)
+    public static function provide(array $host): Server\Server
     {
         return new Server\Server($host);
     }
 }
-?>

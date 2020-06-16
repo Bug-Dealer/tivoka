@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Tivoka - JSON-RPC done right!
  * Copyright (c) 2011-2012 by Marcel Klehr <mklehr@gmx.net>
@@ -36,8 +37,14 @@ namespace Tivoka;
  */
 abstract class Tivoka
 {
-    const SPEC_1_0 = 8;             // 000 001 000
-    const SPEC_2_0 = 16;            // 000 010 000
+    /**
+     * @var int
+     */
+    public const SPEC_1_0 = 8;             // 000 001 000
+    /**
+     * @var int
+     */
+    public const SPEC_2_0 = 16;            // 000 010 000
 
     /**
      * Evaluates and returns the passed JSON-RPC spec version
@@ -48,17 +55,16 @@ abstract class Tivoka
      * @return int
      * @throws Exception\SpecException
      */
-    public static function validateSpecVersion($version)
+    public static function validateSpecVersion(string $version): int
     {
-        switch($version) {
+        switch ($version) {
             case '1.0':
                 return Tivoka::SPEC_1_0;
                 break;
             case '2.0':
                 return Tivoka::SPEC_2_0;
             default:
-                throw new Exception\SpecException('Unsupported spec version: '+$version);
+                throw new Exception\SpecException('Unsupported spec version: ' + $version);
         }
     }
 }
-?>

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Tivoka - JSON-RPC done right!
  * Copyright (c) 2011-2012 by Marcel Klehr <mklehr@gmx.net>
@@ -30,6 +31,7 @@
  */
 
 namespace Tivoka\Client;
+
 use Tivoka\Exception;
 use Tivoka\Client\Connection\ConnectionInterface;
 
@@ -37,42 +39,43 @@ use Tivoka\Client\Connection\ConnectionInterface;
  * JSON-RPC native remote interface
  * @package Tivoka
  */
-class NativeInterface {
-    
+class NativeInterface
+{
+
     /**
      * Holds the last request
      * @var Request
      */
-    public $last_request;
-    
+    public $request;
+
     /**
      * Holds the connection to the remote server
      * @var ConnectionInterface
      */
     public $connection;
-    
+
     /**
      * Construct a native remote interface
      * @param ConnectionInterface $connection The connection to use
      */
-    public function __construct(ConnectionInterface $connection) {
+    public function __construct(ConnectionInterface $connection)
+    {
         $this->connection = $connection;
     }
-    
+
     /**
      * Sends a JSON-RPC request
-     * @throws Exception\RemoteProcedureException
      * @return mixed
+     * @throws Exception\RemoteProcedureException
      */
-    public function __call($method, $args) {
-        $this->last_request = new Request($method, $args);
-        $this->connection->send($this->last_request);
-        
-        if($this->last_request->isError()) {
-            throw new Exception\RemoteProcedureException($this->last_request->errorMessage, $this->last_request->error);
-        }
-        return $this->last_request->result;
-    }
+    public function __call($method, $args)
+    {
+        $this->request = new Request($method, $args);
+        $this->connection->send($this->request);
 
+        if ($this->request->isError()) {
+            throw new Exception\RemoteProcedureException($this->request->errorMessage, $this->request->error);
+        }
+        return $this->request->result;
+    }
 }
-?>

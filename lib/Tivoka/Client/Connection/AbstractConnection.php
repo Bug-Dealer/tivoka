@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Tivoka - JSON-RPC done right!
  * Copyright (c) 2011-2012 by Marcel Klehr <mklehr@gmx.net>
@@ -30,6 +31,7 @@
  */
 
 namespace Tivoka\Client\Connection;
+
 use Tivoka\Exception;
 use Tivoka\Client\NativeInterface;
 use Tivoka\Client\Notification;
@@ -40,93 +42,25 @@ use Tivoka\Tivoka;
  * JSON-RPC connection
  * @package Tivoka
  */
-abstract class AbstractConnection implements ConnectionInterface {
+abstract class AbstractConnection implements ConnectionInterface
+{
 
     /**
      * Initial timeout value.
      * @var int
      */
-    const DEFAULT_TIMEOUT = 5;
-
+    protected const DEFAULT_TIMEOUT = 5;
+    public $spec = Tivoka::SPEC_2_0;
     /**
      * Timeot.
      * @var int
      */
     protected $timeout = self::DEFAULT_TIMEOUT;
-
     /**
      * Connections options.
      * @var array
      */
-    protected $options = array();
-
-    public $spec = Tivoka::SPEC_2_0;
-
-    /**
-     * Sets the spec version to use for this connection
-     *
-     * @param string $spec The spec version (e.g.: "2.0")
-     *
-     * @return $this
-     */
-    public function useSpec($spec) {
-        $this->spec = Tivoka::validateSpecVersion($spec);
-        return $this;
-    }
-
-    /**
-     * Changes connection options.
-     * @param array $options
-     * @return $this Self reference.
-     */
-    public function setOptions($options) {
-        $this->options = $options;
-        return $this;
-    }
-
-    /**
-     * Changes timeout.
-     * @param int $timeout
-     * @return $this Self reference.
-     */
-    public function setTimeout($timeout)
-    {
-    	$this->timeout = $timeout;
-
-    	return $this;
-    }
-
-    /**
-     * Send a request directly
-     *
-     * @param string $method
-     * @param array $params
-     *
-     * @return Request
-     */
-    public function sendRequest($method, $params=null) {
-        $request = new Request($method, $params);
-        $this->send($request);
-        return $request;
-    }
-
-    /**
-     * Send a notification directly
-     * @param string $method
-     * @param array $params
-     */
-    public function sendNotification($method, $params=null) {
-        $this->send(new Notification($method, $params));
-    }
-
-    /**
-     * Creates a native remote interface for the target server
-     * @return NativeInterface
-     */
-    public function getNativeInterface()
-    {
-        return new NativeInterface($this);
-    }
+    protected $options = [];
 
     /**
      * Constructs connection handler.
@@ -138,12 +72,82 @@ abstract class AbstractConnection implements ConnectionInterface {
         // TCP conneciton is defined as ['host' => $host, 'port' => $port] definition
         if (is_array($target) && isset($target['host'], $target['port'])) {
             return new Tcp($target['host'], $target['port']);
-        } elseif (is_string($target) && preg_match('/^wss?:\/\//', $target)) {
+        } elseif (is_string($target) && preg_match('~^wss?://~', $target)) {
             // WebSocket URL starts with ws:// or wss://
             return new WebSocket($target);
         } else {
             // HTTP end-point should be defined just as string
             return new Http($target);
         }
+    }
+
+    /**
+     * Sets the spec version to use for this connection
+     *
+     * @param string $spec The spec version (e.g.: "2.0")
+     *
+     * @return $this
+     */
+    public function useSpec(string $spec)
+    {
+        $this->spec = Tivoka::validateSpecVersion($spec);
+        return $this;
+    }
+
+    /**
+     * Changes connection options.
+     * @param array $options
+     * @return $this Self reference.
+     */
+    public function setOptions(string $options)
+    {
+        $this->options = $options;
+        return $this;
+    }
+
+    /**
+     * Changes timeout.
+     * @param int $timeout
+     * @return $this Self reference.
+     */
+    public function setTimeout($timeout)
+    {
+        $this->timeout = $timeout;
+
+        return $this;
+    }
+
+    /**
+     * Send a request directly
+     *
+     * @param string $method
+     * @param array $params
+     *
+     * @return Request
+     */
+    public function sendRequest(string $method, array $params = null)
+    {
+        $request = new Request($method, $params);
+        $this->send($request);
+        return $request;
+    }
+
+    /**
+     * Send a notification directly
+     * @param string $method
+     * @param array $params
+     */
+    public function sendNotification(string $method, array $params = null)
+    {
+        $this->send(new Notification($method, $params));
+    }
+
+    /**
+     * Creates a native remote interface for the target server
+     * @return NativeInterface
+     */
+    public function getNativeInterface(): NativeInterface
+    {
+        return new NativeInterface($this);
     }
 }

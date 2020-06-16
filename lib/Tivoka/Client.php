@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Tivoka - JSON-RPC done right!
  * Copyright (c) 2011-2012 by Marcel Klehr <mklehr@gmx.net>
@@ -31,90 +32,75 @@
 
 namespace Tivoka;
 
+use Tivoka\Client\BatchRequest;
+use Tivoka\Client\Connection\ConnectionInterface;
+use Tivoka\Client\Notification;
+use Tivoka\Client\Request;
+
 /**
  * The public interface to all tivoka functions
  * @package Tivoka
  */
 abstract class Client
 {
-    
+
     /**
      * Initializes a Connection to a remote server
      * @param mixed $target Remote end-point definition
-     * @return Client\Connection\ConnectionInterface
      */
-    public static function connect($target) {
+    public static function connect($target): ConnectionInterface
+    {
         return Client\Connection\AbstractConnection::factory($target);
     }
-    
-    /**
-     * Creates a request
-     * @param string $method The method to invoke
-     * @param array $params The parameters
-     * @return Client\Request
-     */
-    public static function createRequest($method, $params=null) {
-        return new Client\Request($method, $params);
-    }
-    
+
     /**
      * alias of Tivoka\Client::createRequest
      * @see Client::createRequest
      */
-    public static function request($method, $params=null) {
+    public static function request(string $method, array $params = null): Request
+    {
         return self::createRequest($method, $params);
     }
 
     /**
-     * Creates a notification
-     *
-     * @param string $method The method to invoke
-     * @param array $params The parameters
-     *
-     * @return Client\Notification
+     * Creates a request
      */
-    public static function createNotification($method, $params=null) {
-        return new Client\Notification($method, $params);
+    public static function createRequest(string $method, array $params = null): Request
+    {
+        return new Client\Request($method, $params);
     }
 
     /**
      * alias of Tivoka\Client::createNotification
      * @see Client::createNotification
-
-     * @param string $method The method to invoke
-     * @param array $params The parameters
-     *
-     * @return Client\Notification
      */
-    public static function notification($method, $params=null) {
+    public static function notification(string $method, array $params = null): Notification
+    {
         return self::createNotification($method, $params);
     }
-    
+
     /**
-     * Creates a batch request
-     * @param mixed $request either an array of requests or a comma-seperated list of requests
-     *
-     * @return Client\BatchRequest
-     * @throws Exception\Exception
+     * Creates a notification
      */
-    public static function createBatch($request) {
-        if(func_num_args() > 1 ) $request = func_get_args();
-        if(!is_array($request)) throw new Exception\Exception('Object of invalid data type passed to Tivoka::createBatch.');
-        return new Client\BatchRequest($request);
+    public static function createNotification(string $method, array $params = null): Notification
+    {
+        return new Client\Notification($method, $params);
     }
 
     /**
      * alias of Tivoka\Client::createBatch
      * @see Client::createBatch
-     *
-     * @param mixed $request either an array of requests or a comma-seperated list of requests
-     *
-     * @return Client\BatchRequest
-     * @throws Exception\Exception
      */
-    public static function batch($request) {
-        if(func_num_args() > 1 ) $request = func_get_args();
-        return self::createBatch($request);
+    public static function batch(Request ...$requests): BatchRequest
+    {
+        return self::createBatch($requests);
+    }
+
+    /**
+     * Creates a batch request
+     */
+    public static function createBatch(Request ...$requests): BatchRequest
+    {
+        return new Client\BatchRequest($requests);
     }
 }
-?>

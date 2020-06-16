@@ -1,11 +1,11 @@
 # Tivoka
-[JSON-RPC](http://jsonrpc.org/) client and server for PHP 5.3+
+[JSON-RPC](http://jsonrpc.org/) client and server for PHP 7.3+
 
 * Easily switch between the [v1.0](http://json-rpc.org/wiki/specification) and [v2.0](http://jsonrpc.org/specification) specs
 * HTTP, TCP and Websocket transports available
 
 ## Examples ##
-These are just some quick examples. Check out the docs in [`/doc/`](https://github.com/marcelklehr/tivoka/tree/develop/doc).
+These are just some quick examples. Check out the docs in [`/doc/`](https://github.com/bug-dealer/tivoka/tree/develop/doc).
 
 Do a request through HTTP...
 ```php
@@ -49,7 +49,7 @@ Tivoka\Server::provide($methods)->dispatch();
 
 ## Links
  - Have a look at the documentation in `doc/`
- - Submit any bugs, suggestions or questions to the [issue tracker](http://github.com/marcelklehr/tivoka/issues)
+ - Submit any bugs, suggestions or questions to the [issue tracker](https://github.com/bug-dealer/tivoka/issues)
 
 ## Installation
 
@@ -57,7 +57,7 @@ Tivoka\Server::provide($methods)->dispatch();
 1. Set up `composer.json` in your project directory:
 ```
 {
-  "require":{"tivoka/tivoka":"*"}
+  "require":{"bug-dealer/tivoka":"*"}
 }
 ```
 
@@ -73,6 +73,14 @@ Copyright 2011-2012 by Marcel Klehr
 MIT License.
 
 ## Changelog ##
+
+4.0.2
+
+ * Fix Tivoka\Client\Request::http_parse_headers() always returns empty
+ * Fix Tivoka\Client\BatchRequests::setHeaders() do nothing
+ * Modernize code for PHP 7.3
+ * Bump PHP version to 7.3
+
 3.5.1
 
  * Fix Http Connection

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Tivoka - JSON-RPC done right!
  * Copyright (c) 2011-2012 by Marcel Klehr <mklehr@gmx.net>
@@ -38,43 +39,44 @@ use Tivoka\Client\NativeInterface;
  * Connection interface
  * @package Tivoka
  */
-interface ConnectionInterface {
+interface ConnectionInterface
+{
     /**
      * Sets the spec version to use for this connection
      * @param string $spec The spec version (e.g.: "2.0")
      */
-    public function useSpec($spec);
+    public function useSpec(string $spec);
 
     /**
      * Sets any backend-specific options for this connection
      * @param string $options The backend-specific options.
      */
-    public function setOptions($options);
+    public function setOptions(string $options);
 
     /**
      * Sends a JSON-RPC request
-     * @param Request $request A Tivoka request
+     * @param Request[] $requests
      * @return Request if sent as a batch request the BatchRequest object will be returned
      */
-    public function send(Request $request);
-    
+    public function send(Request ...$requests): Request;
+
     /**
      * Send a request directly
      * @param string $method
      * @param array $params
      */
-    public function sendRequest($method, $params=null);
-    
+    public function sendRequest(string $method, array $params = null);
+
     /**
      * Send a notification directly
      * @param string $method
      * @param array $params
      */
-    public function sendNotification($method, $params=null);
-    
+    public function sendNotification(string $method, array $params = null);
+
     /**
      * Creates a native remote interface for the target server
      * @return NativeInterface
      */
-    public function getNativeInterface();
+    public function getNativeInterface(): NativeInterface;
 }

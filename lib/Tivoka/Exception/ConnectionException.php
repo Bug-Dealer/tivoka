@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Tivoka - JSON-RPC done right!
  * Copyright (c) 2011-2012 by Marcel Klehr <mklehr@gmx.net>
@@ -34,5 +35,6 @@ namespace Tivoka\Exception;
  * Tivoka ConnectionException
  * @package Tivoka
  */
-class ConnectionException extends Exception {}
-?>
+class ConnectionException extends Exception
+{
+}

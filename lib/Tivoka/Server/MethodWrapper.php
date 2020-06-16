@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Tivoka - JSON-RPC done right!
  * Copyright (c) 2011-2012 by Marcel Klehr <mklehr@gmx.net>
@@ -29,7 +30,6 @@
  */
 
 namespace Tivoka\Server;
-use Tivoka\Exception;
 
 /**
  * MethodWrapper for implementing anonymous objects on the fly
@@ -40,7 +40,7 @@ class MethodWrapper
     /**
      * @var array The list of callbacks
      */
-    private $___methods;
+    private $methods = [];
 
     /**
      * Registers a server method
@@ -49,24 +49,14 @@ class MethodWrapper
      * @param callback $method The callback
      * @returns bool FALSE if no valid callback has been given
      */
-    public function ___register($name, $method)
+    public function ___register(string $name, callable $method): bool
     {
-        if(!is_callable($method)) return FALSE;
+        if (!is_callable($method)) {
+            return false;
+        }
 
-        $this->___methods[$name] = $method;
-        return TRUE;
-    }
-
-    /**
-     * Returns TRUE if the method with the given name is registered and a valid callback
-     *
-     * @param callback $method The name of the method to check
-     * @returns bool
-     */
-    public function ___exist($method)
-    {
-        if(!is_array($this->___methods))return FALSE;
-        if(is_callable($this->___methods[$method]))return TRUE;
+        $this->methods[$name] = $method;
+        return true;
     }
 
     /**
@@ -76,13 +66,26 @@ class MethodWrapper
      * @param array $args
      * @return mixed|void
      */
-    public function __call($method,$args)
+    public function __call(string $method, array $args)
     {
-        if(!$this->___exist($method)){
-            $args[0]->error(-32601); return;
+        if (!$this->___exist($method)) {
+            $args[0]->error(-32601);
+            return;
         }
         $prc = $args[0];
-        return call_user_func_array($this->___methods[$method],array($prc));
+        return call_user_func_array($this->methods[$method], [$prc]);
+    }
+
+    /**
+     * Returns TRUE if the method with the given name is registered and a valid callback
+     */
+    public function ___exist(string $method): bool
+    {
+        if (!is_array($this->methods)) {
+            return false;
+        }
+        if (is_callable($this->methods[$method])) {
+            return true;
+        }
     }
 }
-?>

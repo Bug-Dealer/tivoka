@@ -1,10 +1,10 @@
 <?php
 
 namespace Tivoka\Client\Connection;
+
 use Tivoka\Client\BatchRequest;
 use Tivoka\Exception;
 use Tivoka\Client\Request;
-
 use WebSocket\Client;
 
 /**
@@ -15,9 +15,10 @@ use WebSocket\Client;
  *
  * The WebSocket itself is handled by textalk/websocket package.
  */
-class WebSocket extends AbstractConnection {
-    protected $url, ///< Given URL
-        $ws_client; ///< The WebSocket\Client instance
+class WebSocket extends AbstractConnection
+{
+    protected $url; ///< Given URL
+    protected $ws_client; ///< The WebSocket\Client instance
 
     /**
      * Constructs connection.
@@ -29,12 +30,15 @@ class WebSocket extends AbstractConnection {
      *   - headers:  Request headers to add/override.
      *   - timeout:  Socket connect and wait timeout in seconds.
      */
-    public function __construct($url, $options = array())
+    public function __construct($url, $options = [])
     {
-        $this->url       = $url;
+        $this->url = $url;
 
-        if (isset($options['timeout'])) $this->timeout = $options['timeout'];
-        else $options['timeout'] = $this->timeout;
+        if (isset($options['timeout'])) {
+            $this->timeout = $options['timeout'];
+        } else {
+            $options['timeout'] = $this->timeout;
+        }
 
         $this->ws_client = new Client($url, $options);
     }
@@ -53,15 +57,16 @@ class WebSocket extends AbstractConnection {
     /**
      * Sends a JSON-RPC request over plain WebSocket.
      *
-     * @param Request $request,... A Tivoka request.
-     *
+     * @param Request[] $requests
      * @return Request|BatchRequest If sent as a batch request the BatchRequest object will be returned.
+     * @throws Exception\ConnectionException
      * @throws Exception\Exception
+     * @throws Exception\SpecException
+     * @throws Exception\SyntaxException
      */
-    public function send(Request $request)
+    public function send(Request ...$requests): Request
     {
-        if (func_num_args() > 1)   $request = func_get_args();
-        if (is_array($request))    $request = new BatchRequest($request);
+        $request = count($requests) === 1 ? reset($requests) : new BatchRequest($requests);
 
         if (!($request instanceof Request)) {
             throw new Exception\Exception('Invalid data type to be sent to server');
@@ -85,7 +90,7 @@ class WebSocket extends AbstractConnection {
     /**
      * @return string The websocket URI used.
      */
-    public function getUri()
+    public function getUri(): string
     {
         return $this->url;
     }
